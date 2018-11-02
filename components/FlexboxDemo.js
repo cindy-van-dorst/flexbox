@@ -6,13 +6,15 @@ import {
   Image,
   TouchableOpacity,
   TouchableHighlight,
-  FlatList
+  FlatList,
+  NetInfo
 } from "react-native";
 import * as css from "./Styles";
 import { API_KEY, API_URL } from "react-native-dotenv";
 import _ from "lodash";
 import Modal from "react-native-modal";
 import AddNote from "./AddNote";
+import Loader from "./Loader";
 
 var apiUrl = API_URL;
 var apiKey = API_KEY;
@@ -21,11 +23,12 @@ export default class FlexboxDemo extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLoading: true,
-      notes: [{ Id: " ", Note: "fetching data..." }],
-      note: "Default_note",
-      prio: "99",
-      isModalVisible: false
+      loading: false,
+      notes: [{ Id: " ", Note: " " }],
+      note: " ",
+      prio: " ",
+      isModalVisible: false,
+      isFetching: false,
     };
 
     // binding for handing it to the child component
@@ -33,12 +36,23 @@ export default class FlexboxDemo extends Component {
     this._toggleModal = this._toggleModal.bind(this);
   }
 
-  // add note pop-up modal
+  // toggle add note pop-up modal
   _toggleModal = () =>
     this.setState({ isModalVisible: !this.state.isModalVisible });
 
+  // toggle loading boolean
+  _toggleLoading = () => this.setState({ loading: !this.state.loading });
+
+  // refresh with boolean
+  onRefresh() {
+    this.setState({ isFetching: true }, function() {
+      this.getOrderedNotes();
+    });
+  }
+
   // getting the notes and ordering them with Lodash
   getOrderedNotes() {
+    this._toggleLoading();
     return fetch(apiUrl, {
       method: "GET",
       headers: {
@@ -49,11 +63,12 @@ export default class FlexboxDemo extends Component {
       .then(responseJson => {
         const notes = _.sortBy(responseJson, "Prio", ["desc"]); // Using Lodash to sort array by 'Prio', need to improve this
         this.setState({
-          isLoading: false,
           notes: notes
         });
-        console.log("ordered:" + JSON.stringify(notes));
+        this._toggleLoading();
+        this.setState({ isFetching: false }); // double variable with loading, need to improve this
       })
+      .then()
       .catch(error => {
         console.error(error);
       });
@@ -103,11 +118,19 @@ export default class FlexboxDemo extends Component {
 
   componentDidMount() {
     this.getOrderedNotes();
+
+// based on this need to load the data or show offline (now the app crashed on network failed)
+    NetInfo.isConnected.fetch().then(isConnected => {
+      console.log("Is connected, is " + (isConnected ? "online" : "offline"));
+    });
   }
+
 
   render() {
     return (
       <View style={css.home_screen.container}>
+        <Loader loading={this.state.loading} size="small" />
+
         {/* header component */}
         <View style={css.home_screen.header}>
           <Text style={css.home_screen.note_header}>Notes</Text>
@@ -116,6 +139,8 @@ export default class FlexboxDemo extends Component {
         {/* main component */}
         <View style={css.home_screen.main}>
           <FlatList
+            onRefresh={() => this.onRefresh()}
+            refreshing={this.state.isFetching}
             data={this.state.notes}
             renderItem={({ item }) => (
               <View style={css.home_screen.note}>
@@ -140,7 +165,9 @@ export default class FlexboxDemo extends Component {
                     );
                   }}
                 >
-                  <Text style={css.home_screen.note_text}>{item.Prio}. {item.Note}</Text>
+                  <Text style={css.home_screen.note_text}>
+                    {item.Prio} {item.Note}
+                  </Text>
                 </TouchableHighlight>
               </View>
             )}
@@ -156,10 +183,11 @@ export default class FlexboxDemo extends Component {
               source={require("../assets/buttonAdd.png")}
             />
           </TouchableOpacity>
-          <Modal 
-              isVisible={this.state.isModalVisible}
-              onSwipe={() => this.setState({ isModalVisible: false })}
-              swipeDirection="left">
+          <Modal
+            isVisible={this.state.isModalVisible}
+            onSwipe={() => this.setState({ isModalVisible: false })}
+            swipeDirection="left"
+          >
             <View style={{ flex: 0.3 }}>
               <AddNote
                 method={this.postNote}
