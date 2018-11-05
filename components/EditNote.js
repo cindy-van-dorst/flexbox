@@ -14,21 +14,25 @@ export default class EditNote extends React.Component {
 
   render() {
     return <View style={css.add_note.container}>
-        <TextInput style={css.add_note.textInputAdd} onChangeText={text => this.setState(
+        <TextInput 
+            style={css.add_note.textInputAdd} 
+            placeholder = {this.props.prio}
+            onChangeText={text => this.setState(
               { prio: text }
             )} value={this.state.text} autoFocus={true} keyboardAppearance="dark" keyboardType="numeric" />
 
         <TextInput 
             style={css.add_note.textInputAdd} 
+            placeholder = {this.props.note}
             onChangeText={text => this.setState(
               { note: text }
             )} value={this.state.text} clearButtonMode="always" keyboardAppearance="dark" />
 
         <TouchableOpacity style={css.add_note.addButton} onPress={() => {
             this.props.method(this.state.prio, this.state.note);
-            this.props._toggleModal();
+            this.props._toggleEditModal();
           }}>
-          <Text style={css.add_note.addButtonText}> Add the note</Text>
+          <Text style={css.add_note.addButtonText}> Save the note</Text>
         </TouchableOpacity>
       </View>;
   }

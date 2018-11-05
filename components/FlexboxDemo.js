@@ -6,14 +6,14 @@ import {
   Image,
   TouchableOpacity,
   TouchableHighlight,
-  FlatList,
-  NetInfo
+  FlatList
 } from "react-native";
 import * as css from "./Styles";
 import { API_KEY, API_URL } from "react-native-dotenv";
 import _ from "lodash";
 import Modal from "react-native-modal";
 import AddNote from "./AddNote";
+import EditNote from "./EditNote";
 import Loader from "./Loader";
 
 var apiUrl = API_URL;
@@ -28,7 +28,8 @@ export default class FlexboxDemo extends Component {
       note: " ",
       prio: " ",
       isModalVisible: false,
-      isFetching: false,
+      isEditModalVisible: false,
+      isFetching: false
     };
 
     // binding for handing it to the child component
@@ -39,6 +40,9 @@ export default class FlexboxDemo extends Component {
   // toggle add note pop-up modal
   _toggleModal = () =>
     this.setState({ isModalVisible: !this.state.isModalVisible });
+
+  _toggleEditModal = () =>
+    this.setState({ isEditModalVisible: !this.state.isEditModalVisible });
 
   // toggle loading boolean
   _toggleLoading = () => this.setState({ loading: !this.state.loading });
@@ -96,9 +100,30 @@ export default class FlexboxDemo extends Component {
       .catch(error => console.error("Error:", error));
   }
 
+  // update a note
+  updateNote(id, prio, note) {
+    fetch(apiUrl, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "x-api-key": apiKey
+      },
+      body: JSON.stringify({
+        Id: id,
+        name: "...",
+        note: note,
+        prio: prio
+      })
+    })
+      .then(response => {
+        if (response.ok) this.getOrderedNotes();
+      })
+      .catch(error => console.error("Error:", error));
+  }
+
   // deleting a note
   deleteNote(Id) {
-    console.log("deleteNote clicked");
     fetch(apiUrl, {
       method: "DELETE",
       headers: {
@@ -116,15 +141,18 @@ export default class FlexboxDemo extends Component {
       .catch(error => console.error("Error:", error));
   }
 
-  componentDidMount() {
-    this.getOrderedNotes();
-
-// based on this need to load the data or show offline (now the app crashed on network failed)
-    NetInfo.isConnected.fetch().then(isConnected => {
-      console.log("Is connected, is " + (isConnected ? "online" : "offline"));
+  GetItem(prio, note) {
+    //Alert.alert(item);
+    this._toggleEditModal();
+    this.setState({
+      prio: prio,
+      note: note
     });
   }
 
+  componentDidMount() {
+    this.getOrderedNotes();
+  }
 
   render() {
     return (
@@ -141,6 +169,7 @@ export default class FlexboxDemo extends Component {
           <FlatList
             onRefresh={() => this.onRefresh()}
             refreshing={this.state.isFetching}
+            keyExtractor={({ Id }, index) => Id}
             data={this.state.notes}
             renderItem={({ item }) => (
               <View style={css.home_screen.note}>
@@ -169,9 +198,37 @@ export default class FlexboxDemo extends Component {
                     {item.Prio} {item.Note}
                   </Text>
                 </TouchableHighlight>
+
+                {/*  starting the edit note function here */}
+                <View>
+                  <Text onPress={this.GetItem.bind(this, item.Prio, item.Note)}>
+                    Edit
+                  </Text>
+                  <Modal
+                    isVisible={this.state.isEditModalVisible}
+                    onSwipe={() => this.setState({ isEditModalVisible: false })}
+                    swipeDirection="left"
+                  >
+                    <View style={{ flex: 0.3 }}>
+                      <EditNote
+                        // big todo here to attach the update function (start with also passing the ID)
+                        method={this.updateNote.bind(
+                          this,
+                          item.Id,
+                          item.Prio,
+                          item.Note
+                        )}
+                        prio={this.state.prio}
+                        note={this.state.note}
+                        _toggleEditModal={this._toggleEditModal}
+                      />
+                    </View>
+                  </Modal>
+                </View>
+
+                {/*  ending the edit note function here */}
               </View>
             )}
-            keyExtractor={({ Id }, index) => Id}
           />
         </View>
 
