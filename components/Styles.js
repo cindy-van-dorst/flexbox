@@ -41,6 +41,8 @@ export const home_screen = StyleSheet.create(
       paddingTop: 10,
     },     
     note: {
+      flexDirection:'row', 
+      flexWrap:'wrap',
       backgroundColor: colors.note,
       paddingTop: 10,
       paddingBottom: 10,
@@ -51,6 +53,10 @@ export const home_screen = StyleSheet.create(
       marginTop: 5,
       marginBottom: 5,
     },
+    noteWrapper: {
+      flexDirection:'row', 
+      flexWrap:'wrap'
+    },
     note_header: {
       color: "white",
       fontSize: values.font_title_size,
@@ -60,6 +66,7 @@ export const home_screen = StyleSheet.create(
       color: "black",
       fontSize: values.font_body_size,
       fontFamily: values.font_body,
+      flex: 0.98
     },
     note_input: {
       color: "black",
@@ -78,6 +85,11 @@ export const home_screen = StyleSheet.create(
       marginTop: 5,
       marginBottom: 5,
     },
+    editNote: {
+      width: 18, 
+      height: 18, 
+      opacity: 0.2,
+    },  
   });
 
   export const home_footer = StyleSheet.create(

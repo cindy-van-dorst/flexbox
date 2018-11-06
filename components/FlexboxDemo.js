@@ -34,13 +34,16 @@ export default class FlexboxDemo extends Component {
 
     // binding for handing it to the child component
     this.postNote = this.postNote.bind(this);
+    this.updateNote = this.updateNote.bind(this);
     this._toggleModal = this._toggleModal.bind(this);
+    this._toggleEditModal = this._toggleEditModal.bind(this);
   }
 
   // toggle add note pop-up modal
   _toggleModal = () =>
     this.setState({ isModalVisible: !this.state.isModalVisible });
 
+  // toggle edit note pop-up modal
   _toggleEditModal = () =>
     this.setState({ isEditModalVisible: !this.state.isEditModalVisible });
 
@@ -111,9 +114,9 @@ export default class FlexboxDemo extends Component {
       },
       body: JSON.stringify({
         Id: id,
-        name: "...",
-        note: note,
-        prio: prio
+        Name: "...",
+        Prio: prio,
+        Note: note
       })
     })
       .then(response => {
@@ -141,13 +144,34 @@ export default class FlexboxDemo extends Component {
       .catch(error => console.error("Error:", error));
   }
 
-  GetItem(prio, note) {
+  GetItem(id, prio, note) {
     //Alert.alert(item);
     this._toggleEditModal();
     this.setState({
+      id: id,
       prio: prio,
       note: note
     });
+  }
+
+  deleteAlert(id) {
+    Alert.alert(
+      "Are you sure to delete?",
+      "the note can't be recovered",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          onPress: () => this.deleteNote(id),
+          style: "destructive"
+        }
+      ],
+      { cancelable: false }
+    );
   }
 
   componentDidMount() {
@@ -173,60 +197,46 @@ export default class FlexboxDemo extends Component {
             data={this.state.notes}
             renderItem={({ item }) => (
               <View style={css.home_screen.note}>
-                <TouchableHighlight
-                  onPress={() => {
-                    Alert.alert(
-                      "Are you sure to delete?",
-                      "the note can't be recovered",
-                      [
-                        {
-                          text: "Cancel",
-                          onPress: () => console.log("Cancel Pressed"),
-                          style: "cancel"
-                        },
-                        {
-                          text: "Delete",
-                          onPress: () => this.deleteNote(item.Id),
-                          style: "destructive"
-                        }
-                      ],
-                      { cancelable: false }
-                    );
-                  }}
+                <Text
+                  style={css.home_screen.note_text}
+                  onPress={this.deleteAlert.bind(this, item.Id)}
                 >
-                  <Text style={css.home_screen.note_text}>
-                    {item.Prio} {item.Note}
-                  </Text>
-                </TouchableHighlight>
+                  {item.Prio} {item.Note}
+                </Text>
 
-                {/*  starting the edit note function here */}
-                <View>
-                  <Text onPress={this.GetItem.bind(this, item.Prio, item.Note)}>
-                    Edit
-                  </Text>
-                  <Modal
-                    isVisible={this.state.isEditModalVisible}
-                    onSwipe={() => this.setState({ isEditModalVisible: false })}
-                    swipeDirection="left"
-                  >
-                    <View style={{ flex: 0.3 }}>
-                      <EditNote
-                        // big todo here to attach the update function (start with also passing the ID)
-                        method={this.updateNote.bind(
-                          this,
-                          item.Id,
-                          item.Prio,
-                          item.Note
-                        )}
-                        prio={this.state.prio}
-                        note={this.state.note}
-                        _toggleEditModal={this._toggleEditModal}
-                      />
-                    </View>
-                  </Modal>
-                </View>
+                {/*  starting the edit note function */}
 
-                {/*  ending the edit note function here */}
+                <TouchableOpacity
+                  onPress={this.GetItem.bind(
+                    this,
+                    item.Id,
+                    item.Prio,
+                    item.Note
+                  )}
+                >
+                  <Image
+                    style={css.home_screen.editNote}
+                    source={require("../assets/buttonEdit.png")}
+                  />
+                </TouchableOpacity>
+
+                <Modal
+                  isVisible={this.state.isEditModalVisible}
+                  onSwipe={() => this.setState({ isEditModalVisible: false })}
+                  swipeDirection="left"
+                >
+                  <View style={{ flex: 0.3 }}>
+                    <EditNote
+                      // big todo here to attach the update function (start with also passing the ID)
+                      updateMethod={this.updateNote}
+                      id={this.state.id}
+                      prio={this.state.prio}
+                      note={this.state.note}
+                      _toggleEditModal={this._toggleEditModal}
+                    />
+                  </View>
+                </Modal>
+                {/*  ending the edit note function */}
               </View>
             )}
           />
