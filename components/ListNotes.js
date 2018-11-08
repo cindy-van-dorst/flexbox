@@ -5,21 +5,20 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  TouchableHighlight,
   FlatList
 } from "react-native";
-import * as css from "./Styles";
+import * as css from "../assets/Styles";
 import { API_KEY, API_URL } from "react-native-dotenv";
 import _ from "lodash";
 import Modal from "react-native-modal";
 import AddNote from "./AddNote";
 import EditNote from "./EditNote";
-import Loader from "./Loader";
+import Loader from "../helpers/Loader";
 
 var apiUrl = API_URL;
 var apiKey = API_KEY;
 
-export default class FlexboxDemo extends Component {
+export default class ListNotes extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -39,25 +38,25 @@ export default class FlexboxDemo extends Component {
     this._toggleEditModal = this._toggleEditModal.bind(this);
   }
 
-  // toggle add note pop-up modal
+// toggle add note pop-up modal
   _toggleModal = () =>
     this.setState({ isModalVisible: !this.state.isModalVisible });
 
-  // toggle edit note pop-up modal
+// toggle edit note pop-up modal
   _toggleEditModal = () =>
     this.setState({ isEditModalVisible: !this.state.isEditModalVisible });
 
-  // toggle loading boolean
+// toggle loading boolean
   _toggleLoading = () => this.setState({ loading: !this.state.loading });
 
-  // refresh with boolean
+// refresh boolean
   onRefresh() {
     this.setState({ isFetching: true }, function() {
       this.getOrderedNotes();
     });
   }
 
-  // getting the notes and ordering them with Lodash
+// getting the notes and ordering them with Lodash
   getOrderedNotes() {
     this._toggleLoading();
     return fetch(apiUrl, {
@@ -81,7 +80,7 @@ export default class FlexboxDemo extends Component {
       });
   }
 
-  // adding a note
+// adding a note
   postNote(postPrio, postNote) {
     console.log("postNote clicked");
     fetch(apiUrl, {
@@ -103,7 +102,7 @@ export default class FlexboxDemo extends Component {
       .catch(error => console.error("Error:", error));
   }
 
-  // update a note
+// update a note
   updateNote(id, prio, note) {
     fetch(apiUrl, {
       method: "PUT",
@@ -125,7 +124,7 @@ export default class FlexboxDemo extends Component {
       .catch(error => console.error("Error:", error));
   }
 
-  // deleting a note
+// deleting a note
   deleteNote(Id) {
     fetch(apiUrl, {
       method: "DELETE",
@@ -144,6 +143,7 @@ export default class FlexboxDemo extends Component {
       .catch(error => console.error("Error:", error));
   }
 
+// show the update note modal
   GetItem(id, prio, note) {
     //Alert.alert(item);
     this._toggleEditModal();
@@ -154,6 +154,7 @@ export default class FlexboxDemo extends Component {
     });
   }
 
+// delete a note
   deleteAlert(id) {
     Alert.alert(
       "Are you sure to delete?",
@@ -174,6 +175,7 @@ export default class FlexboxDemo extends Component {
     );
   }
 
+// loading notes when component is mounted
   componentDidMount() {
     this.getOrderedNotes();
   }
@@ -227,7 +229,6 @@ export default class FlexboxDemo extends Component {
                 >
                   <View style={{ flex: 0.3 }}>
                     <EditNote
-                      // big todo here to attach the update function (start with also passing the ID)
                       updateMethod={this.updateNote}
                       id={this.state.id}
                       prio={this.state.prio}

@@ -6,7 +6,7 @@
 
 import React, { Component } from "react";
 import { Platform, StyleSheet, Text, View, NetInfo } from "react-native";
-import FlexboxDemo from "./components/FlexboxDemo";
+import ListNotes from "./components/ListNotes";
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -17,7 +17,7 @@ export default class App extends Component<Props> {
     if (!isOnline) {
       return <Text> Offline </Text>;
     } else {
-      return <FlexboxDemo />;
+      return <ListNotes />
     }
   }
 }

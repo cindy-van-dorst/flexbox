@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Text, TextInput, View, TouchableOpacity } from "react-native";
-import * as css from "./Styles";
+import * as css from "../assets/Styles";
 
 export default class EditNote extends React.Component {
   constructor(props) {
