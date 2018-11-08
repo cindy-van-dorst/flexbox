@@ -92,7 +92,7 @@ export default class FlexboxDemo extends Component {
         "x-api-key": apiKey
       },
       body: JSON.stringify({
-        name: "...",
+  //      name: "...",
         note: postNote,
         prio: postPrio
       })
@@ -114,7 +114,7 @@ export default class FlexboxDemo extends Component {
       },
       body: JSON.stringify({
         Id: id,
-        Name: "...",
+  //      Name: "...",
         Prio: prio,
         Note: note
       })
